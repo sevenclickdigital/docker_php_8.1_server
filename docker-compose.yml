@@ -1,0 +1,75 @@
+version: "3.7"
+services:
+    # imagem Docker
+    docker_rename:
+        build:
+            args:
+                user: seven
+                uid: 1000
+            context: ./
+            dockerfile: Dockerfile
+        image: laravel-app
+        restart: unless-stopped
+        working_dir: /var/www/
+        volumes:
+            - ./../:/var/www
+        networks:
+            - rename_networks
+
+    #nGinx
+    nginx_rename:
+        image: nginx:alpine
+        restart: unless-stopped
+        ports:
+            - ${NGINX_PORT}:80
+        volumes:
+            - ./../:/var/www
+            - ./nginx/:/etc/nginx/conf.d/
+        networks:
+            - rename_networks
+
+    #MySQL
+    mysql_rename:
+        image: mysql:latest
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+            MYSQL_USER: ${DB_USERNAME}
+        volumes:
+            - ./.docker/mysql/dbdata:/var/lib/mysql
+        ports:
+            - ${MYSQL_PORT}:3306
+        networks:
+            - rename_networks
+
+    #phpMyadmin
+    phpMyadmin_rename:
+        image: phpmyadmin/phpmyadmin
+        restart: unless-stopped
+        ports:
+            - ${PHPMYADMIN_PORT}:80
+        environment:
+            PMA_HOST: mysql
+            PMA_USER: ${DB_USERNAME}
+            PMA_PASSWORD: ${DB_PASSWORD}
+            UPLOAD_LIMIT: 300M
+        depends_on:
+            - mysql
+        networks:
+            - rename_networks
+
+    #MailHog
+    mailhog:
+        image: mailhog/mailhog:latest
+        restart: unless-stopped
+        ports:
+            - ${MAIL1_PORT}:1025
+            - ${MAIL2_PORT}:8025
+        networks:
+            - rename_networks
+
+networks:
+    rename_networks:
+        driver: bridge
