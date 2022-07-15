@@ -14,7 +14,7 @@ services:
         volumes:
             - ./../:/var/www
         networks:
-            - rename_networks
+            - networks_rename
 
     #nGinx
     nginx_rename:
@@ -26,7 +26,7 @@ services:
             - ./../:/var/www
             - ./nginx/:/etc/nginx/conf.d/
         networks:
-            - rename_networks
+            - networks_rename
 
     #MySQL
     mysql_rename:
@@ -42,7 +42,7 @@ services:
         ports:
             - ${MYSQL_PORT}:3306
         networks:
-            - rename_networks
+            - networks_rename
 
     #phpMyadmin
     phpMyadmin_rename:
@@ -51,25 +51,25 @@ services:
         ports:
             - ${PHPMYADMIN_PORT}:80
         environment:
-            PMA_HOST: mysql
+            PMA_HOST: mysql_rename
             PMA_USER: ${DB_USERNAME}
             PMA_PASSWORD: ${DB_PASSWORD}
             UPLOAD_LIMIT: 300M
         depends_on:
-            - mysql
+            - mysql_rename
         networks:
-            - rename_networks
+            - networks_rename
 
     #MailHog
-    mailhog:
+    mailhog_rename:
         image: mailhog/mailhog:latest
         restart: unless-stopped
         ports:
             - ${MAIL1_PORT}:1025
             - ${MAIL2_PORT}:8025
         networks:
-            - rename_networks
+            - networks_rename
 
 networks:
-    rename_networks:
+    networks_rename:
         driver: bridge
